@@ -1,233 +1,56 @@
 # How many countries can you name?
-
-# dataset
-countries = {
-    "afghanistan": False,
-    "albania": False,
-    "algeria": False,
-    "andorra": False,
-    "angola": False,
-    "antigua and barbuda": False,
-    "argentina": False,
-    "armenia": False,
-    "australia": False,
-    "austria": False,
-    "azerbaijan": False,
-    "bahamas": False,
-    "bahrain": False,
-    "bangladesh": False,
-    "barbados": False,
-    "belarus": False,
-    "belgium": False,
-    "belize": False,
-    "benin": False,
-    "bhutan": False,
-    "bolivia": False,
-    "bosnia and herzegovina": False,
-    "botswana": False,
-    "brazil": False,
-    "brunei": False,
-    "bulgaria": False,
-    "burkina faso": False,
-    "burundi": False,
-    "cote d'ivoire": False,
-    "cabo verde": False,
-    "cambodia": False,
-    "cameroon": False,
-    "canada": False,
-    "central african republic": False,
-    "chad": False,
-    "chile": False,
-    "china": False,
-    "colombia": False,
-    "comoros": False,
-    "congo": False,
-    "costa rica": False,
-    "croatia": False,
-    "cuba": False,
-    "cyprus": False,
-    "czechia": False,
-    "democratic republic of the congo": False,
-    "denmark": False,
-    "djibouti": False,
-    "dominica": False,
-    "dominican republic": False,
-    "ecuador": False,
-    "egypt": False,
-    "el salvador": False,
-    "equatorial guinea": False,
-    "eritrea": False,
-    "estonia": False,
-    "eswatini": False,
-    "ethiopia": False,
-    "fiji": False,
-    "finland": False,
-    "france": False,
-    "gabon": False,
-    "gambia": False,
-    "georgia": False,
-    "germany": False,
-    "ghana": False,
-    "greece": False,
-    "grenada": False,
-    "guatemala": False,
-    "guinea": False,
-    "guinea-bissau": False,
-    "guyana": False,
-    "haiti": False,
-    "honduras": False,
-    "hungary": False,
-    "iceland": False,
-    "india": False,
-    "indonesia": False,
-    "iran": False,
-    "iraq": False,
-    "ireland": False,
-    "israel": False,
-    "italy": False,
-    "jamaica": False,
-    "japan": False,
-    "jordan": False,
-    "kazakhstan": False,
-    "kenya": False,
-    "kiribati": False,
-    "kuwait": False,
-    "kyrgyzstan": False,
-    "laos": False,
-    "latvia": False,
-    "lebanon": False,
-    "lesotho": False,
-    "liberia": False,
-    "libya": False,
-    "liechtenstein": False,
-    "lithuania": False,
-    "luxembourg": False,
-    "madagascar": False,
-    "malawi": False,
-    "malaysia": False,
-    "maldives": False,
-    "mali": False,
-    "malta": False,
-    "marshall islands": False,
-    "mauritania": False,
-    "mauritius": False,
-    "mexico": False,
-    "micronesia": False,
-    "moldova": False,
-    "monaco": False,
-    "mongolia": False,
-    "montenegro": False,
-    "morocco": False,
-    "mozambique": False,
-    "myanmar": False,
-    "namibia": False,
-    "nauru": False,
-    "nepal": False,
-    "netherlands": False,
-    "new zealand": False,
-    "nicaragua": False,
-    "niger": False,
-    "nigeria": False,
-    "north korea": False,
-    "north macedonia": False,
-    "norway": False,
-    "oman": False,
-    "pakistan": False,
-    "palau": False,
-    "palestine": False,
-    "panama": False,
-    "papua new guinea": False,
-    "paraguay": False,
-    "peru": False,
-    "philippines": False,
-    "poland": False,
-    "portugal": False,
-    "qatar": False,
-    "romania": False,
-    "russia": False,
-    "rwanda": False,
-    "st kitts and nevis": False,
-    "saint lucia": False,
-    "saint vincent and the grenadines": False,
-    "samoa": False,
-    "san marino": False,
-    "sao tome and principe": False,
-    "saudi arabia": False,
-    "senegal": False,
-    "serbia": False,
-    "seychelles": False,
-    "sierra leone": False,
-    "singapore": False,
-    "slovakia": False,
-    "slovenia": False,
-    "solomon islands": False,
-    "somalia": False,
-    "south africa": False,
-    "south korea": False,
-    "south sudan": False,
-    "spain": False,
-    "sri lanka": False,
-    "sudan": False,
-    "suriname": False,
-    "sweden": False,
-    "switzerland": False,
-    "syria": False,
-    "tajikistan": False,
-    "tanzania": False,
-    "thailand": False,
-    "timor-leste": False,
-    "togo": False,
-    "tonga": False,
-    "trinidad and tobago": False,
-    "tunisia": False,
-    "turkey": False,
-    "turkmenistan": False,
-    "tuvalu": False,
-    "uganda": False,
-    "ukraine": False,
-    "united arab emriates": False,
-    "united kingdom": False,
-    "united states of america": False,
-    "uruguay": False,
-    "uzbekistan": False,
-    "vanuatu": False,
-    "venezuela": False,
-    "vietnam": False,
-    "zambia": False,
-    "zimbabwe": False,
-}
+import sqlite3
 
 
-def menu(countries):
+def menu():
     start = input("Start game? y/n ")
     if start == "y":
-        temp = countries
         score = game()
     else:
         pass
-
-    # Reset data
-    countries = temp
     print("congrats! you scored {}/195!".format(score))
     return
 
 
 def game():
+    database = "countries.db"
+    con = sqlite3.connect(database)
+    cur = con.cursor()
+
+    # Sets all previously answered records to 0
+    restart_game = """UPDATE countries_answer SET answer = 0"""
+    cur.execute(restart_game)
+    con.commit()
+
     count = 0
     while True:
         answer = str(input('Name a Country (type "end" to give up) ')).lower()
         if answer == "end":
             return count
-        elif answer in countries:
-            if countries[answer] == False:
-                countries[answer] = True
-                count += 1
-                print("Current score = {}".format(count))
-            else:
-                print("Already answered!")
         else:
-            print("Wrong answer!")
+            sql_statement = (
+                """SELECT country_code FROM countries WHERE country_name=?"""
+            )
+            country_code = con.execute(sql_statement, (answer,)).fetchone()
+            if country_code is None:
+                print("Wrong answer!")
+            else:
+                country_code = country_code[0]
+                answered = (
+                    """SELECT answer FROM countries_answer WHERE country_code=?"""
+                )
+                answered_or_not = con.execute(answered, (country_code,)).fetchone()[0]
+                if answered_or_not == 0:
+                    update_answer = (
+                        """UPDATE countries_answer SET answer=? WHERE country_code=?"""
+                    )
+                    con.execute(update_answer, (1, country_code))
+                    con.commit()
+                    count += 1
+                    print("Current Score: {}/195".format(count))
+                else:
+                    print("Already answered!")
 
 
 if __name__ == "__main__":
-    menu(countries)
+    menu()
